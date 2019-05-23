@@ -1,5 +1,6 @@
 import random
 from time import sleep
+import multiprocessing
 import subprocess
 from generic_multiprocessing import TaskManager, TaskBase
 
@@ -11,7 +12,7 @@ class MyTask(TaskBase):
 
     def start_task(self, *locks):
         sleep(random.uniform(0, .2))
-        print_lock = locks[0]
+        print_lock = locks[0][0]
         cmd = ' '.join(['ls -l && echo', str(self.i)])
         out = subprocess.check_output(cmd, shell=True)
         with print_lock:
@@ -19,7 +20,7 @@ class MyTask(TaskBase):
 
 
 def run():
-    tm = TaskManager(5)
+    tm = TaskManager(None, multiprocessing.Lock())
     for _ in range(1000):
         tm.add_task(MyTask(_))
     tm.start()
